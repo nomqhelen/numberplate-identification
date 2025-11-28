@@ -33,6 +33,7 @@ You need to create your own Firebase project:
 4. Generate **Service Account Key**
 5. Download the JSON file
 6. Copy values to `.env` file
+7. Copy values to the serviceAccountKey.json file
 
 
 
@@ -44,7 +45,7 @@ nano .env     # Mac/Linux
 ### 6. Initialize Database (Optional)
 ```bash
 # Run the seed script to populate demo data
-python seed_data.py
+python seed.cjs
 ```
 
 ### 7. Run the Server
@@ -80,6 +81,32 @@ FIREBASE_CLIENT_EMAIL=your-service-account-email
 python manage.py runserver 127.0.0.1:8001
 ```
 
+
+## 🌐 Frontend Setup
+
+### 1. Install Node.js & npm
+Make sure you have [Node.js](https://nodejs.org/) and npm installed.
+
+### 2. Install Frontend Dependencies
+```bash
+npm install
+```
+
+### 3. Start the Frontend Development Server
+```bash
+npm run dev
+```
+The app will be available at [http://localhost:8080](http://localhost:8080) (or the port shown in your terminal).
+
+### 4. Troubleshooting
+If you encounter errors, try:
+```bash
+npm cache clean --force
+npm install
+```
+Or delete `node_modules` and `package-lock.json`, then run `npm install` again.
+
+---
 
 
 
