@@ -1,0 +1,24 @@
+# Python / Django
+venv/
+env/
+*.pyc
+__pycache__/
+db.sqlite3
+*.env
+**/serviceAccountKey.json
+
+# Node / React / Vite
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+ *.env
