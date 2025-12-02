@@ -41,7 +41,7 @@ FIREBASE_DATABASE_URL = config('FIREBASE_DATABASE_URL', default='https://toll-sy
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 'nomqhelemoyo.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
