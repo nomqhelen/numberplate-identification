@@ -10,7 +10,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-  resolve: {
+  
+  base: '/numberplate-identification/', // GitHub repo name - only affects production build
+   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
