@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8001/api';
+import API_BASE_URL from '../config/api';
 
 const tollSystemAPI = {
   // Test connection - use the correct endpoint
@@ -242,3 +242,11 @@ const tollSystemAPI = {
 };
 
 export default tollSystemAPI;
+
+// Example: Update any fetch calls to use API_BASE_URL
+export const fetchDashboardStats = async () => {
+  const response = await fetch(`${API_BASE_URL}/dashboard/stats/`);
+  return response.json();
+};
+
+// Add similar functions for other endpoints
