@@ -312,7 +312,7 @@ const TollManagement = () => {
                   <Label htmlFor="rfid">RFID Tag</Label>
                   <Input
                     id="rfid"
-                    placeholder="RFID001"
+                    placeholder="535D8E56"
                     value={rfidInput}
                     onChange={(e) => setRfidInput(e.target.value)}
                     required
@@ -420,31 +420,36 @@ const TollManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.slice(0, 20).map((txn) => (
-                  <TableRow key={txn.id}>
-                    <TableCell className="font-mono text-sm">{txn.id}</TableCell>
-                    <TableCell className="font-semibold">{txn.licensePlate}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{txn.vehicleType}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {vehicles.find(v => v.id === txn.vehicleId)?.ownerName || 'Unknown'}
-                    </TableCell>
-                    <TableCell className="text-sm">{txn.checkpoint}</TableCell>
-                    <TableCell className="font-semibold">
-                      {parseFloat(txn.amount || 0) === 0 ? 
-                        <span className="text-blue-600 font-bold">FREE</span> : 
-                        <span className="text-green-600">${parseFloat(txn.amount || 0).toFixed(2)}</span>
-                      }
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {new Date(txn.timestamp).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="default">Success</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredTransactions.slice(0, 20).map((txn) => {
+                  // Find the vehicle to get its type
+                  const vehicle = vehicles.find(v => v.id === txn.vehicleId);
+                  
+                  return (
+                    <TableRow key={txn.id}>
+                      <TableCell className="font-mono text-sm">{txn.id}</TableCell>
+                      <TableCell className="font-semibold">{txn.licensePlate}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{vehicle?.type || txn.vehicleType || 'N/A'}</Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {vehicle?.ownerName || 'Unknown'}
+                      </TableCell>
+                      <TableCell className="text-sm">{txn.checkpoint}</TableCell>
+                      <TableCell className="font-semibold">
+                        {parseFloat(txn.amount || 0) === 0 ? 
+                          <span className="text-blue-600 font-bold">FREE</span> : 
+                          <span className="text-green-600">${parseFloat(txn.amount || 0).toFixed(2)}</span>
+                        }
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(txn.timestamp).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="default">Success</Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {filteredTransactions.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-muted-foreground py-8">

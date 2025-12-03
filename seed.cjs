@@ -105,8 +105,8 @@ const seedData = {
   // Vehicle Fleet with Zimbabwe Plates
   vehicles: {
     "vehicle1": {
-      licensePlate: "AAA-1234",
-      rfid: "RFID001",
+      licensePlate: "ABH-2411",
+      rfid: "535D8E56",
       type: "Small Car",
       ownerId: "owner1",
       ownerName: "John Smith",
@@ -131,8 +131,8 @@ const seedData = {
       createdAt: "2024-01-16T11:00:00Z"
     },
     "vehicle3": {
-      licensePlate: "CCC-9101",
-      rfid: "RFID003", 
+      licensePlate: "XYZ-5678",
+      rfid: "E33BFA05", 
       type: "Motorbike",
       ownerId: "owner2",
       ownerName: "Rebecca Too",

@@ -8,6 +8,7 @@ from .firebase_service import firebase_service
 import json
 import logging
 from datetime import datetime
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -254,6 +255,19 @@ def admin_add_owner(request):
 def rfid_toll_scan(request):
     """Process RFID scan from scanner hardware"""
     try:
+        # Only check scanner token if it's provided (for hardware scanners)
+        # Allow manual toll additions without token
+        token = request.headers.get('X-Scanner-Token') or request.META.get('HTTP_X_SCANNER_TOKEN')
+        
+        # If token is provided, validate it (hardware scanner)
+        # If no token, allow it (manual addition from frontend)
+        if token and token != settings.SCANNER_TOKEN:
+            logger.warning(f"Unauthorized scanner access attempt with token: {token}")
+            return Response({
+                'error': 'Unauthorized - Invalid scanner token',
+                'success': False
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         # Parse incoming data
         if request.content_type == 'application/json':
             data = json.loads(request.body)

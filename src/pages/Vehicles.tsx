@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatCard from "@/components/StatCard";
-import { Car, Radio, Plus, Search } from "lucide-react";
+import { Car, Radio, Plus, Search, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -13,6 +13,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import tollSystemAPI from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import VehicleRegistrationForm from "@/components/VehicleRegistrationForm";
@@ -22,6 +29,8 @@ const Vehicles = () => {
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [stats, setStats] = useState({
     totalVehicles: 0,
     activeRFIDs: 0,
@@ -100,6 +109,11 @@ const Vehicles = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleViewDetails = (vehicle: any) => {
+    setSelectedVehicle(vehicle);
+    setDetailsOpen(true);
   };
 
   if (loading) {
@@ -232,7 +246,7 @@ const Vehicles = () => {
                             Activate
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => handleViewDetails(vehicle)}>
                           View Details
                         </Button>
                       </div>
@@ -255,6 +269,116 @@ const Vehicles = () => {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Vehicle Details Dialog */}
+        <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Vehicle Details</DialogTitle>
+              <DialogDescription>
+                Complete information for {selectedVehicle?.licensePlate}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedVehicle && (
+              <div className="grid gap-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">License Plate</p>
+                    <p className="text-lg font-semibold">{selectedVehicle.licensePlate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">RFID Tag</p>
+                    <p className="text-lg font-mono">{selectedVehicle.rfid}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Owner</p>
+                    <p className="text-lg">{selectedVehicle.ownerName || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Vehicle Type</p>
+                    <Badge variant="outline" className="mt-1">{selectedVehicle.type}</Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Make & Model</p>
+                    <p className="text-lg">{selectedVehicle.make} {selectedVehicle.model}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Year</p>
+                    <p className="text-lg">{selectedVehicle.year}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Current Balance</p>
+                    <p className="text-2xl font-bold text-success">
+                      ${parseFloat(selectedVehicle.balance || 0).toFixed(2)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Status</p>
+                    <Badge
+                      variant={selectedVehicle.status === "active" ? "default" : "destructive"}
+                      className="mt-1"
+                    >
+                      {selectedVehicle.status}
+                    </Badge>
+                  </div>
+                </div>
+
+                {selectedVehicle.color && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Color</p>
+                    <p className="text-lg">{selectedVehicle.color}</p>
+                  </div>
+                )}
+
+                {selectedVehicle.registeredAt && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Registered Date</p>
+                    <p className="text-lg">
+                      {new Date(selectedVehicle.registeredAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-4">
+                  {selectedVehicle.status === "active" ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleStatusUpdate(selectedVehicle.id, "suspended");
+                        setDetailsOpen(false);
+                      }}
+                    >
+                      Suspend Vehicle
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleStatusUpdate(selectedVehicle.id, "active");
+                        setDetailsOpen(false);
+                      }}
+                    >
+                      Activate Vehicle
+                    </Button>
+                  )}
+                  <Button variant="ghost" onClick={() => setDetailsOpen(false)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
