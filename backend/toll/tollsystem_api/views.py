@@ -255,12 +255,9 @@ def admin_add_owner(request):
 def rfid_toll_scan(request):
     """Process RFID scan from scanner hardware"""
     try:
-        # Only check scanner token if it's provided (for hardware scanners)
-        # Allow manual toll additions without token
         token = request.headers.get('X-Scanner-Token') or request.META.get('HTTP_X_SCANNER_TOKEN')
         
-        # If token is provided, validate it (hardware scanner)
-        # If no token, allow it (manual addition from frontend)
+        # Allow requests without token (for manual frontend use) or with valid token (for ESP32)
         if token and token != settings.SCANNER_TOKEN:
             logger.warning(f"Unauthorized scanner access attempt with token: {token}")
             return Response({
@@ -268,7 +265,6 @@ def rfid_toll_scan(request):
                 'success': False
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Parse incoming data
         if request.content_type == 'application/json':
             data = json.loads(request.body)
         else:
@@ -276,7 +272,6 @@ def rfid_toll_scan(request):
             
         rfid = data.get('rfid')
         checkpoint = data.get('checkpoint', 'Unknown')
-        toll_amount = float(data.get('toll_amount', 5.00))
         scanner_id = data.get('scanner_id', 'Unknown')
         
         logger.info(f"RFID scan received: {rfid} at {checkpoint}")
@@ -316,6 +311,23 @@ def rfid_toll_scan(request):
                 'license_plate': vehicle.get('licensePlate')
             }, status=status.HTTP_403_FORBIDDEN)
         
+        # AUTO-CALCULATE TOLL AMOUNT based on vehicle type
+        vehicle_type = vehicle.get('type', 'Small Car')
+        
+        # Get pricing rules from Firebase
+        pricing_rules_ref = firebase_service.db.reference('pricingRules')
+        pricing_rules = pricing_rules_ref.get()
+        
+        toll_amount = 5.00  # Default fallback
+        
+        if pricing_rules:
+            for rule_id, rule in pricing_rules.items():
+                if rule.get('vehicleType') == vehicle_type and rule.get('isActive'):
+                    toll_amount = float(rule.get('basePrice', 5.00))
+                    break
+        
+        logger.info(f"Vehicle type: {vehicle_type}, Toll amount: ${toll_amount}")
+        
         # Check balance
         current_balance = float(vehicle.get('balance', 0))
         if current_balance < toll_amount:
@@ -335,21 +347,23 @@ def rfid_toll_scan(request):
         success = firebase_service.update_vehicle_balance(vehicle_id, new_balance)
         
         if success:
-            # Create transaction record
+            # Create complete transaction record matching seed data structure
             transaction_data = {
                 'vehicleId': vehicle_id,
                 'ownerId': vehicle.get('ownerId'),
+                'rfid': rfid,
+                'vehicleType': vehicle_type,
                 'amount': toll_amount,
                 'balanceAfter': new_balance,
-                'balanceBefore': current_balance,
+                'tollPlazaId': data.get('tollPlazaId', 'unknown'),
                 'checkpoint': checkpoint,
-                'scannerId': scanner_id,
+                'readerId': scanner_id,
                 'licensePlate': vehicle.get('licensePlate'),
-                'rfidTag': rfid,
-                'timestamp': datetime.now().isoformat(),
+                'timestamp': datetime.utcnow().isoformat() + 'Z',
                 'status': 'completed'
             }
             
+            # Save to global transactions
             transaction_id = firebase_service.push_toll_record(transaction_data)
             
             logger.info(f"Toll processed: {transaction_id} - ${toll_amount} from {vehicle.get('licensePlate')}")
@@ -357,12 +371,13 @@ def rfid_toll_scan(request):
             return Response({
                 'success': True,
                 'transaction_id': transaction_id,
+                'vehicle_type': vehicle_type,
                 'toll_amount': toll_amount,
                 'license_plate': vehicle.get('licensePlate'),
                 'new_balance': new_balance,
                 'previous_balance': current_balance,
                 'checkpoint': checkpoint,
-                'timestamp': datetime.now().isoformat()
+                'timestamp': transaction_data['timestamp']
             }, status=status.HTTP_200_OK)
         else:
             logger.error(f"Failed to update vehicle balance for {vehicle_id}")
