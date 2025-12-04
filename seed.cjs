@@ -535,27 +535,27 @@ const seedData = {
     "trans1": {
       vehicleId: "vehicle1",
       ownerId: "owner1",
-      rfid: "RFID001",
+      rfid: "535D8E56",  // ✅ FIXED - Match vehicle1
       vehicleType: "Small Car",
-      amount: 5.00,  // Small car rate
+      amount: 5.00,
       balanceAfter: 45.00,
       tollPlazaId: "plaza1",
       checkpoint: "Harare-Chitungwiza Toll Plaza",
       timestamp: "2024-11-14T08:30:00Z",
-      licensePlate: "AAA-1234",
+      licensePlate: "ABH-2411",  // ✅ FIXED - Match vehicle1
       readerId: "reader1"
     },
     "trans2": {
       vehicleId: "vehicle3",
       ownerId: "owner2",
-      rfid: "RFID003", 
+      rfid: "E33BFA05",  // ✅ FIXED - Match vehicle3
       vehicleType: "Motorbike",
-      amount: 0.00,  // FREE for motorbikes!
+      amount: 0.00,
       balanceAfter: 15.00,
       tollPlazaId: "plaza2",
       checkpoint: "Norton Toll Plaza", 
       timestamp: "2024-11-14T14:15:00Z",
-      licensePlate: "CCC-9101",
+      licensePlate: "XYZ-5678",  // ✅ FIXED - Match vehicle3
       readerId: "reader2"
     },
     "trans3": {
@@ -563,7 +563,7 @@ const seedData = {
       ownerId: "owner3",
       rfid: "RFID004",
       vehicleType: "Truck", 
-      amount: 10.00,  // Truck rate
+      amount: 10.00,
       balanceAfter: 70.00,
       tollPlazaId: "plaza3", 
       checkpoint: "Beatrice Toll Plaza",
